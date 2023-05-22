@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Contact } from "./contact.entitie";
+import { Contact } from "./index";
 
 @Entity("clients")
 export class Client {
