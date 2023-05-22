@@ -13,11 +13,13 @@ clientRouters.post(
 clientRouters.get("", clientController.retrieveListClientController);
 clientRouters.get(
   "/:id",
+  middlewares.validateTokenJwtMiddleware,
   middlewares.validateClientIdMiddleware,
   clientController.retrieveClientController
 );
 clientRouters.patch(
   "/:id",
+  middlewares.validateTokenJwtMiddleware,
   middlewares.validateBodyMiddleware(clientSchemas.updateClientSchema),
   middlewares.validateClientIdMiddleware,
   middlewares.validateEmailExistsMiddleware,
@@ -25,6 +27,7 @@ clientRouters.patch(
 );
 clientRouters.delete(
   "/:id",
+  middlewares.validateTokenJwtMiddleware,
   middlewares.validateClientIdMiddleware,
   clientController.deleteClientController
 );
