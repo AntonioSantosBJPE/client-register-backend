@@ -11,6 +11,10 @@ clientRouters.post(
   clientController.createClientController
 );
 clientRouters.get("", clientController.retrieveListClientController);
-clientRouters.get("/:id", clientController.retrieveClientController);
+clientRouters.get(
+  "/:id",
+  middlewares.validateClientIdMiddleware,
+  clientController.retrieveClientController
+);
 clientRouters.patch("/:id", clientController.updateClientController);
 clientRouters.delete("/:id", clientController.deleteClientController);

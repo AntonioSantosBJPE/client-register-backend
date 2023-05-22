@@ -1,3 +1,8 @@
 import { validateBodyMiddleware } from "./validateBody.middleware";
 import { validateEmailExistsMiddleware } from "./validateEmailExists.middleware";
-export { validateBodyMiddleware, validateEmailExistsMiddleware };
+import { validateClientIdMiddleware } from "./validateClientId.middleware";
+export {
+  validateBodyMiddleware,
+  validateEmailExistsMiddleware,
+  validateClientIdMiddleware,
+};

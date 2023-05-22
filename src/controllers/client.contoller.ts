@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Client } from "../entities";
 import * as clienteInterfaces from "../interfaces/client.interface";
 import * as clientServices from "../services/client";
 
@@ -25,7 +26,9 @@ export const retrieveClientController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  return res.status(200).json("Route retrieve client!");
+  const client: Client = res.locals.client;
+
+  return res.status(200).json(client);
 };
 
 export const updateClientController = async (
