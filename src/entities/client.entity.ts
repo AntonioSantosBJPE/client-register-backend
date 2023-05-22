@@ -20,7 +20,7 @@ export class Client {
   @Column({ type: "varchar", length: "45", unique: true })
   email: string;
 
-  @Column({ type: "varchar", length: "11" })
+  @Column({ type: "varchar", length: "14" })
   phone: string;
 
   @Column({ type: "varchar", length: "120" })

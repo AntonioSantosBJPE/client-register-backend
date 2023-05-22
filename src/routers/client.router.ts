@@ -7,6 +7,7 @@ export const clientRouters: Router = Router();
 clientRouters.post(
   "",
   middlewares.validateBodyMiddleware(clientSchemas.createClientSchema),
+  middlewares.validateEmailExistsMiddleware,
   clientController.createClientController
 );
 clientRouters.get("", clientController.retrieveListClientController);
