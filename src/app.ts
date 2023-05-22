@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/clients", routers.clientRouters);
+app.use("/login", routers.loginRouters);
 
 app.use(errorHandler);
 
