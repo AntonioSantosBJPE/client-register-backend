@@ -54,5 +54,7 @@ export const deleteClientController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const client: Client = res.locals.client;
+  await clientServices.deleteClientService(client);
   return res.status(204).send();
 };

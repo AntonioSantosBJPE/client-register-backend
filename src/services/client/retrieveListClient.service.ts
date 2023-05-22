@@ -10,7 +10,7 @@ export const retrieveListClientService =
       AppDataSource.getRepository(Client);
 
     let clients: Array<Client> = await clientRepository.find({
-      withDeleted: true,
+      withDeleted: false,
     });
 
     return returnListClientSchema.parse(clients);
