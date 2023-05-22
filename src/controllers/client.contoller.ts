@@ -1,10 +1,16 @@
 import { Request, Response } from "express";
+import * as clienteInterfaces from "../interfaces/client.interface";
+import { createClientService } from "../services/client/createClient.service";
 
 export const createClientController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  return res.status(201).json("Route create new client!");
+  const body: clienteInterfaces.TcreateClient = req.body;
+  const newUser: clienteInterfaces.TreturnClient = await createClientService(
+    body
+  );
+  return res.status(201).json(newUser);
 };
 
 export const retrieveListClientController = async (
