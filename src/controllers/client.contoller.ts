@@ -32,5 +32,5 @@ export const deleteClientController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  return res.status(204);
+  return res.status(204).send();
 };
