@@ -26,8 +26,10 @@ export const retrieveClientController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const client: Client = res.locals.client;
+  const findClient: Client = res.locals.client;
 
+  const client: clienteInterfaces.TreturnClient =
+    await clientServices.retrieveClientService(findClient);
   return res.status(200).json(client);
 };
 

@@ -16,11 +16,16 @@ export const validateClientIdMiddleware = async (
   }
 
   const repository: Repository<Client> = AppDataSource.getRepository(Client);
-  const findClient: Client | null = await repository.findOneBy({
-    id: paramsId,
+  const findClient: Client | null = await repository.findOne({
+    where: { id: paramsId },
+    withDeleted: true,
   });
 
   if (findClient === null) {
+    throw new AppError("Client not found", 404);
+  }
+
+  if (findClient.deletedAt) {
     throw new AppError("Client not found", 404);
   }
 
