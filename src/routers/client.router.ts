@@ -16,5 +16,11 @@ clientRouters.get(
   middlewares.validateClientIdMiddleware,
   clientController.retrieveClientController
 );
-clientRouters.patch("/:id", clientController.updateClientController);
+clientRouters.patch(
+  "/:id",
+  middlewares.validateBodyMiddleware(clientSchemas.updateClientSchema),
+  middlewares.validateClientIdMiddleware,
+  middlewares.validateEmailExistsMiddleware,
+  clientController.updateClientController
+);
 clientRouters.delete("/:id", clientController.deleteClientController);
