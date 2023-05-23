@@ -15,8 +15,5 @@ export const updateClientService = async (
 
   await clientRepository.save(clientUpdate);
 
-  const response: clientIntefaces.TreturnClient =
-    returnClientSchema.parse(clientUpdate);
-
-  return response;
+  return returnClientSchema.parse(clientUpdate);
 };

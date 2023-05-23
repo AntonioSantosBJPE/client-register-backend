@@ -10,10 +10,8 @@ export const createClientService = async (
   const clientRepository: Repository<Client> =
     AppDataSource.getRepository(Client);
 
-  const user: Client = clientRepository.create(payload as Client);
-  await clientRepository.save(user);
+  const cliente: Client = clientRepository.create(payload as Client);
+  await clientRepository.save(cliente);
 
-  const userReturn: clientInterfaces.TreturnClient =
-    returnClientSchema.parse(user);
-  return userReturn;
+  return returnClientSchema.parse(cliente);
 };
