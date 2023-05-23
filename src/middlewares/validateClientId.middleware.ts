@@ -20,7 +20,7 @@ export const validateClientIdMiddleware = async (
     id: paramsId,
   });
 
-  if (findClient === null) {
+  if (!findClient) {
     throw new AppError("Client not found", 404);
   }
 

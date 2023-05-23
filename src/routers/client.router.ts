@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as clientController from "../controllers/client.contoller";
 import * as middlewares from "../middlewares";
 import * as clientSchemas from "../schemas/client.schema";
+
 export const clientRouters: Router = Router();
 
 clientRouters.post(
