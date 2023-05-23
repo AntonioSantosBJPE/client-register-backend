@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { Repository } from "typeorm";
-import { AppDataSource } from "../data-source";
-import { Client } from "../entities";
-import { AppError } from "../error";
-import { isValidUUID } from "./utils";
+import { AppDataSource } from "../../data-source";
+import { Client } from "../../entities";
+import { AppError } from "../../error";
+import { isValidUUID } from "../utils";
 export const validateClientIdMiddleware = async (
   req: Request,
   res: Response,

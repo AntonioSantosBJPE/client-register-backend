@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import { AppError } from "../error";
-import { verify, VerifyErrors } from "jsonwebtoken";
 import "dotenv/config";
+import { NextFunction, Request, Response } from "express";
+import { verify, VerifyErrors } from "jsonwebtoken";
+import { AppError } from "../../error";
 
 export const validateTokenJwtMiddleware = (
   req: Request,

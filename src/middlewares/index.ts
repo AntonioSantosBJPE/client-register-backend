@@ -1,9 +1,11 @@
-import { validateBodyMiddleware } from "./validateBody.middleware";
-import { validateEmailExistsMiddleware } from "./validateEmailExists.middleware";
-import { validateClientIdMiddleware } from "./validateClientId.middleware";
-import { validateTokenJwtMiddleware } from "./validateTokenJwt.middlewares";
-import { validatePermissionClientIdMiddleware } from "./validatePermissionClientId.middlewares";
+import { validateClientIdMiddleware } from "./client/validateClientId.middleware";
+import { validateEmailExistsMiddleware } from "./client/validateEmailExists.middleware";
+import { validatePermissionClientIdMiddleware } from "./client/validatePermissionClientId.middlewares";
 import { validateContactEmailExistInClientMiddleware } from "./contact/validateContactEmailExistInClient.middleware";
+import { validateContactIdMiddleware } from "./contact/validateContactId.middleware";
+import { validatePermissionContactIdMiddleware } from "./contact/validatePermissionContactId.middleware";
+import { validateBodyMiddleware } from "./global/validateBody.middleware";
+import { validateTokenJwtMiddleware } from "./global/validateTokenJwt.middlewares";
 export {
   validateBodyMiddleware,
   validateEmailExistsMiddleware,
@@ -11,4 +13,6 @@ export {
   validateTokenJwtMiddleware,
   validatePermissionClientIdMiddleware,
   validateContactEmailExistInClientMiddleware,
+  validateContactIdMiddleware,
+  validatePermissionContactIdMiddleware,
 };

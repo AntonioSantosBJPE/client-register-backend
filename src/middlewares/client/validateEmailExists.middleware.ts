@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { Repository } from "typeorm";
-import { AppDataSource } from "../data-source";
-import { Client } from "../entities";
-import { AppError } from "../error";
+import { AppDataSource } from "../../data-source";
+import { Client } from "../../entities";
+import { AppError } from "../../error";
 
 export const validateEmailExistsMiddleware = async (
   req: Request,

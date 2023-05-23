@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Client } from "../entities";
+import { Contact } from "../entities";
 import * as contactInterfaces from "../interfaces/contact.interface";
 import * as contactServices from "../services/contact";
 
@@ -14,4 +14,13 @@ export const createContactController = async (
     await contactServices.createContactService(body, clientId);
 
   return res.status(201).json(newContact);
+};
+
+export const retrieveContactController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const contact: Contact = res.locals.contact;
+  const retrieveContact = await contactServices.retrieveContactService(contact);
+  return res.status(200).json(retrieveContact);
 };
