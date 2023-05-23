@@ -35,3 +35,10 @@ clientRouters.delete(
   middlewares.validateClientIdMiddleware,
   clientController.deleteClientController
 );
+
+clientRouters.get(
+  "/:id/contacts",
+  middlewares.validateTokenJwtMiddleware,
+  middlewares.validatePermissionClientIdMiddleware,
+  clientController.retrieveContactsClientController
+);

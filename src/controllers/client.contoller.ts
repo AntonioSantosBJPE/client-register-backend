@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Client } from "../entities";
 import * as clientInterfaces from "../interfaces/client.interface";
+import * as contactInterfaces from "../interfaces/contact.interface";
 import * as clientServices from "../services/client";
 
 export const createClientController = async (
@@ -57,4 +58,16 @@ export const deleteClientController = async (
   const client: Client = res.locals.client;
   await clientServices.deleteClientService(client);
   return res.status(204).send();
+};
+
+export const retrieveContactsClientController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const clientId: string = res.locals.clientTokenInfos.id;
+
+  const listContacts: contactInterfaces.TreturnContactList =
+    await clientServices.retrieveContactsClientService(clientId);
+
+  return res.status(200).json(listContacts);
 };
