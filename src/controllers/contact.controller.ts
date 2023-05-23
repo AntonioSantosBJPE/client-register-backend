@@ -24,3 +24,16 @@ export const retrieveContactController = async (
   const retrieveContact = await contactServices.retrieveContactService(contact);
   return res.status(200).json(retrieveContact);
 };
+
+export const updateContactController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const contact: Contact = res.locals.contact;
+  const body: contactInterfaces.TupdateContact = req.body;
+
+  const updateContact: contactInterfaces.TreturnContact =
+    await contactServices.updateContactService(contact, body);
+
+  return res.status(200).json(updateContact);
+};

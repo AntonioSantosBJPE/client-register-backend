@@ -20,5 +20,12 @@ contactRouters.get(
   middlewares.validatePermissionContactIdMiddleware,
   contactControllers.retrieveContactController
 );
-contactRouters.patch("/:id");
+contactRouters.patch(
+  "/:id",
+  middlewares.validateTokenJwtMiddleware,
+  middlewares.validateBodyMiddleware(contactSchemas.updateContactSchema),
+  middlewares.validateContactIdMiddleware,
+  middlewares.validateContactEmailExistInClientMiddleware,
+  contactControllers.updateContactController
+);
 contactRouters.delete("/:id");
