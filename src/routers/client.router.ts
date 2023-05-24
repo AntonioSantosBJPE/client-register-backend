@@ -13,14 +13,14 @@ clientRouters.post(
 );
 clientRouters.get("", clientController.retrieveListClientController);
 clientRouters.get(
-  "/:id",
+  "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
   middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateClientIdMiddleware,
   clientController.retrieveClientController
 );
 clientRouters.patch(
-  "/:id",
+  "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
   middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateBodyMiddleware(clientSchemas.updateClientSchema),
@@ -29,7 +29,7 @@ clientRouters.patch(
   clientController.updateClientController
 );
 clientRouters.delete(
-  "/:id",
+  "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
   middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateClientIdMiddleware,
@@ -37,8 +37,14 @@ clientRouters.delete(
 );
 
 clientRouters.get(
-  "/:id/contacts",
+  "/profile/:id/contacts",
   middlewares.validateTokenJwtMiddleware,
   middlewares.validatePermissionClientIdMiddleware,
   clientController.retrieveContactsClientController
+);
+
+clientRouters.get(
+  "/profile",
+  middlewares.validateTokenJwtMiddleware,
+  clientController.retrievProfileClientController
 );

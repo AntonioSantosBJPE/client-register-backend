@@ -1,7 +1,7 @@
-import "express-async-errors";
-import express, { Application } from "express";
-import { errorHandler } from "./error";
 import cors from "cors";
+import express, { Application } from "express";
+import "express-async-errors";
+import { errorHandler } from "./error";
 import * as routers from "./routers";
 
 const app: Application = express();
