@@ -71,3 +71,15 @@ export const retrieveContactsClientController = async (
 
   return res.status(200).json(listContacts);
 };
+
+export const retrievProfileClientController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const clientId: string = res.locals.clientTokenInfos.id;
+
+  const client: clientInterfaces.TreturnClient =
+    await clientServices.retrieveProfileClientService(clientId);
+
+  return res.status(200).json(client);
+};
