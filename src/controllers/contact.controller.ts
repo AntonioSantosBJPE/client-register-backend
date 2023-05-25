@@ -43,7 +43,6 @@ export const deleteContactController = async (
   res: Response
 ): Promise<Response> => {
   const contact: Contact = res.locals.contact;
-  console.log(contact);
   await contactServices.deleteContactService(contact);
   return res.status(204).send();
 };
