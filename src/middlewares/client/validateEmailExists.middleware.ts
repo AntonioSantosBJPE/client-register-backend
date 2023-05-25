@@ -21,7 +21,14 @@ export const validateEmailExistsMiddleware = async (
     });
 
     if (clientToValidate) {
-      throw new AppError("Email already exists", 409);
+      if (req.method === "POST") {
+        throw new AppError("Email already exists", 409);
+      }
+
+      if (req.method === "PATCH") {
+        if (!(req.params.id === clientToValidate.id))
+          throw new AppError("Email already exists", 409);
+      }
     }
   }
 

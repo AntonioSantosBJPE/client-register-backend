@@ -15,6 +15,7 @@ export const validateContactEmailExistInClientMiddleware = async (
   const contactRepository: Repository<Contact> =
     AppDataSource.getRepository(Contact);
 
+  console.log(req.params.id);
   if (bodyEmail) {
     const findEmailContactExistInClient = await contactRepository.findOne({
       where: {
@@ -27,7 +28,14 @@ export const validateContactEmailExistInClientMiddleware = async (
     });
 
     if (findEmailContactExistInClient) {
-      throw new AppError("Contact email already exists in Client", 409);
+      if (req.method === "POST") {
+        throw new AppError("Contact email already exists in Client", 409);
+      }
+
+      if (req.method === "PATCH") {
+        if (!(req.params.id === findEmailContactExistInClient.id))
+          throw new AppError("Contact email already exists in Client", 409);
+      }
     }
   }
 
