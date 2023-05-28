@@ -16,16 +16,6 @@ export const createClientController = async (
   return res.status(201).json(newClient);
 };
 
-export const retrieveListClientController = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const clients: clientInterfaces.TreturnListClient =
-    await clientServices.retrieveListClientService();
-
-  return res.status(200).json(clients);
-};
-
 export const retrieveClientController = async (
   req: Request,
   res: Response
