@@ -1,0 +1,1281 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Contacts-Books-API",
+    "description": "Contacts-Books-API é uma API RESTful desenvolvida utilizando Node.js, Express, TypeORM e um banco de dados Postgres. Ela permite o cadastro de usuário, chamados de clientes, que com o cadastro realizado podem realizar o login na aplicação. O usuário cliente estando logando pode atualizar seus dados de perfil, e gerenciar sua lista de contatos. Ele poderá criar contatos, editar as informações deles, os apagar e também listar todos eles.",
+    "termsOfService": "http://localhost:3000/terms",
+    "contact": {
+      "email": "netoifpe@gmail.com"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/",
+      "description": "Ambiente de Teste"
+    },
+    {
+      "url": "https://contacts-book-api-6ydl.onrender.com",
+      "description": "Ambiente de produção"
+    }
+  ],
+  "paths": {
+    "/clients": {
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Cadastro de um novo cliente",
+        "description": "Esta rota é responsável por criar um novo cliente. As chaves \"email\", \"name\" \"phone\" e \"password\" são obrigatórias e chaves extras enviadas são desconsideradas. Não é possível criar um usuário com um email já existente. A senha precisa conter no mínimo 8 caracteres, sendo ao menos uma letra minúscula, uma letra maiúscula, um número, e um caracter especial.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Client_create"
+              },
+              "example": {
+                "name": "Antonio Santos",
+                "email": "neto@mail.com",
+                "phone": "(81)92222-1111",
+                "password": "12345Ab*"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK - Criação de usuário realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": {
+                  "id": "be6495d3-e35d-441e-9453-cb79ef557b02",
+                  "name": "Antonio Santos",
+                  "email": "neto@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-28",
+                  "updatedAt": "2023-05-28"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Alguma chave obrigatória não foi enviada ou está em um formato inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "bad_request_keys_required": {
+                    "value": {
+                      "message": {
+                        "email": ["required"],
+                        "name": ["required"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_email": {
+                    "value": {
+                      "message": {
+                        "email": ["Invalid email"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_password": {
+                    "value": {
+                      "message": {
+                        "password": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_password_2": {
+                    "value": {
+                      "message": {
+                        "password": [
+                          "One uppercase character",
+                          "One lowercase character",
+                          "One number",
+                          "One special character",
+                          "String must contain at least 8 character(s)"
+                        ]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_name": {
+                    "value": {
+                      "message": {
+                        "name": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_phone": {
+                    "value": {
+                      "message": {
+                        "phone": ["Expected string", "received number"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Tentativa de criar um usuário com um email já cadastrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Email already exists"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/profile/{clientId}": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Buscar os dados de um cliente",
+        "description": "Esta rota será responsável por buscar os dados de um client cadastrado pelo id informado. É necessaário enviar o ID do client através do parâmetro e enviar um token de autorização. O cliente só pode buscar seus próprios dados.",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": {
+                  "id": "90e33fb4-e18d-49b0-8d74-c309239f3c1e",
+                  "name": "teste3",
+                  "email": "teste3@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-22",
+                  "updatedAt": "2023-05-25"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Cliente não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Client not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Clients"],
+        "summary": "Altualizar os dados de um cliente",
+        "description": "Esta rota será responsável por realizar uma atualização nos dados de um cliente cadastrado. É necessaário enviar o ID do cliente através de parâmetro e enviar um token de autorização. O cliente só pode atualizar os dados de sua própria conta. É possível atualizar as chaves \"name\", \"email\", \"phone\" e \"password\", e chaves extras enviadas serão desconsideradas.",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Client_update"
+              },
+              "example": {
+                "name": "Antonio Santos",
+                "email": "neto@mail.com",
+                "phone": "(81)92222-1111",
+                "password": "12345Ab*"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": {
+                  "id": "90e33fb4-e18d-49b0-8d74-c309239f3c1e",
+                  "name": "teste3",
+                  "email": "teste3@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-22",
+                  "updatedAt": "2023-05-25"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Alguma chave está em um formato inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "bad_request_invalid_email": {
+                    "value": {
+                      "message": {
+                        "email": ["Invalid email"]
+                      }
+                    }
+                  },
+
+                  "bad_request_invalid_name": {
+                    "value": {
+                      "message": {
+                        "name": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_phone": {
+                    "value": {
+                      "message": {
+                        "phone": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_password": {
+                    "value": {
+                      "message": {
+                        "password": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_password_2": {
+                    "value": {
+                      "message": {
+                        "password": [
+                          "One uppercase character",
+                          "One lowercase character",
+                          "One number",
+                          "One special character",
+                          "String must contain at least 8 character(s)"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Cliente não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Client not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Clients"],
+        "summary": "Delete os dados de um cliente",
+        "description": "Esta rota será responsável por realizar um soft delete de um cliente cadastrado. É necessaário enviar o ID do cliente através de parâmetro e enviar um token de autorização. Um cliente só pode apagar sua própria conta.",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID do usuário",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK -"
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Usuário não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "User not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contacts": {
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Cadastro de um novo contato",
+        "description": "Esta rota é responsável por criar um novo contato. As chaves \"email\", \"name\" e \"phone\"  são obrigatórias e chaves extras enviadas são desconsideradas. Não é possível criar um contato com um email já existente em outro contato do cliente. É necessaário enviar um token de autorização.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contact_create"
+              },
+              "example": {
+                "name": "José Santos",
+                "email": "jose@mail.com",
+                "phone": "(81)92222-1111"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK - Criação de usuário realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": {
+                  "id": "c95415fb-2143-41f8-8825-b01127a5249c",
+                  "name": "José Santos",
+                  "email": "jose@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-24",
+                  "updatedAt": "2023-05-24"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Alguma chave obrigatória não foi enviada ou está em um formato inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "bad_request_keys_required": {
+                    "value": {
+                      "message": {
+                        "email": ["required"],
+                        "name": ["required"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_email": {
+                    "value": {
+                      "message": {
+                        "email": ["Invalid email"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_name": {
+                    "value": {
+                      "message": {
+                        "name": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_phone": {
+                    "value": {
+                      "message": {
+                        "phone": ["Expected string", "received number"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Tentativa de criar um contato com um email já cadastrado em outro contato do cliente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Contact email already exists in Client"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contacts/{contactId}": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Buscar os dados de um contato",
+        "description": "Esta rota será responsável por buscar os dados de um contato cadastrado pelo id informado. É necessaário enviar o ID do contato através do parâmetro e enviar um token de autorização. O cliente só pode buscar seus próprios contatos.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact_return"
+                },
+                "example": {
+                  "id": "fa6576d8-3064-492b-ba5e-9b1e8410444d",
+                  "name": "José Santos",
+                  "email": "jose@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-28",
+                  "updatedAt": "2023-05-28"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Cliente não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Contact not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Contacts"],
+        "summary": "Altualizar os dados de um contato",
+        "description": "Esta rota será responsável por realizar uma atualização nos dados de um contato cadastrado. É necessaário enviar o ID do contato através de parâmetro e enviar um token de autorização. O cliente só pode atualizar os dados de se seus contatos. É possível atualizar as chaves \"name\", \"email\" e \"phone\" , e chaves extras enviadas serão desconsideradas.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contact_update"
+              },
+              "example": {
+                "name": "José Santos2",
+                "email": "jose@mail.com",
+                "phone": "(81)92222-1111"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact_return"
+                },
+                "example": {
+                  "id": "fa6576d8-3064-492b-ba5e-9b1e8410444d",
+                  "name": "José Santos2",
+                  "email": "jose@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-28",
+                  "updatedAt": "2023-05-28"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Alguma chave está em um formato inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "bad_request_invalid_email": {
+                    "value": {
+                      "message": {
+                        "email": ["Invalid email"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_name": {
+                    "value": {
+                      "message": {
+                        "name": ["Expected string", "received number"]
+                      }
+                    }
+                  },
+                  "bad_request_invalid_phone": {
+                    "value": {
+                      "message": {
+                        "phone": ["Expected string", "received number"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Cliente não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Client not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete os dados de um contato",
+        "description": "Esta rota será responsável por deletar um contato cadastrado. É necessaário enviar o ID do cliente através de parâmetro e enviar um token de autorização. Um cliente só pode apagar seus próprios contatos.",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK -"
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Usuário não foi encontrado a partir do id enviado.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "User not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/profile": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Buscar os dados de perfil do cliente logado",
+        "description": "Esta rota é responsável por buscar os dados de perfil do usuário logado. É necessário enviar um token de autorização.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": {
+                  "id": "be6495d3-e35d-441e-9453-cb79ef557b02",
+                  "name": "Antonio Santos",
+                  "email": "neto@mail.com",
+                  "phone": "(81)92222-1111",
+                  "createdAt": "2023-05-28",
+                  "updatedAt": "2023-05-28"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/profile/{clientId}/contacts": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Buscar todos os contatos de um cliente",
+        "description": "Esta rota é responsável por buscar todos os contatos de um cliente.  É necessaário enviar o ID do cliente através de parâmetro e enviar um token de autorização. Um cliente só pode listar seus próprios contatos.",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID do contato",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client_return"
+                },
+                "example": [
+                  {
+                    "id": "be6495d3-e35d-441e-9453-cb79ef557b02",
+                    "name": "Antonio Santos",
+                    "email": "neto@mail.com",
+                    "phone": "(81)92222-1111",
+                    "createdAt": "2023-05-28",
+                    "updatedAt": "2023-05-28"
+                  },
+                  {
+                    "id": "be2295d3-eabd-441e-9453-cb79ef557b02",
+                    "name": "Jose Santos",
+                    "email": "santos@mail.com",
+                    "phone": "(81)92222-1111",
+                    "createdAt": "2023-05-28",
+                    "updatedAt": "2023-05-28"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Não foi enviado um token de autorização, o token enviado expirou ou o token é inválido.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "missing_bearer_token": {
+                    "value": {
+                      "message": "Missing bearer token"
+                    }
+                  },
+                  "jwt_expired": {
+                    "value": {
+                      "message": "jwt expired"
+                    }
+                  },
+                  "invalid_token": {
+                    "value": {
+                      "message": "JWT Invalid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - O token enviado não contém a autorização necessária para realizar a requisição.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Insufficient permission"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["Login"],
+        "summary": "Login de cliente cadastrado",
+        "description": "Esta rota é responsável por fazer o login de um usuário cadastrado. As chaves \"email\" e \"password\" são obrigatórias e chaves extras enviadas são desconsideradas. Ao realizar o login será retornado o token de acesso \"accessToken\", que será enviado nas rotas que necessitam de autorização.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              },
+              "example": {
+                "email": "antonio@gmail.com",
+                "password": "12345Ab*"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im5ldG9pZnBlMkBnbWFpbC5jb20iLCJhZG1pbiI6dHJ1ZSwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTY4MjA5MjY4MywiZXhwIjoxNjgyMDk0NDgzLCJzdWIiOiIyIn0.y4xXMb7pFSZ77_Q3jv9IPS_njk-i3XcoYPZwumfjGrU"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Alguma chave obrigatória não foi enviada ou está em um formato inválido.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": {
+                    "email": ["required"],
+                    "password": ["required"]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - O email ou o password estão errados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Invalid credentials"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal Server Error."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Client_create": {
+        "required": ["email", "name", "phone", "password"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Client_update": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Client_return": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "Contact_create": {
+        "required": ["email", "name", "phone"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Contact_update": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "Contact_return": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

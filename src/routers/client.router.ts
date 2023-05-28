@@ -11,28 +11,28 @@ clientRouters.post(
   middlewares.validateEmailExistsMiddleware,
   clientController.createClientController
 );
-clientRouters.get("", clientController.retrieveListClientController);
+
 clientRouters.get(
   "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
-  middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateClientIdMiddleware,
+  middlewares.validatePermissionClientIdMiddleware,
   clientController.retrieveClientController
 );
 clientRouters.patch(
   "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
+  middlewares.validateClientIdMiddleware,
   middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateBodyMiddleware(clientSchemas.updateClientSchema),
-  middlewares.validateClientIdMiddleware,
   middlewares.validateEmailExistsMiddleware,
   clientController.updateClientController
 );
 clientRouters.delete(
   "/profile/:id",
   middlewares.validateTokenJwtMiddleware,
-  middlewares.validatePermissionClientIdMiddleware,
   middlewares.validateClientIdMiddleware,
+  middlewares.validatePermissionClientIdMiddleware,
   clientController.deleteClientController
 );
 
