@@ -7,7 +7,7 @@ import { createClientMock } from "../../mocks/clients/createClient.router.mock";
 import { createContactMock } from "../../mocks/contacts/createContact.router.mock";
 import tokenMock from "../../mocks/login/token.mock";
 
-describe("GET /contacts/:contactId", () => {
+describe("DELETE /contacts/:contactId", () => {
   let connection: DataSource;
 
   const baseUrl: string = "/contacts";
@@ -15,10 +15,12 @@ describe("GET /contacts/:contactId", () => {
   const invalidIdUrl2: string =
     baseUrl + "/90e33fb4-e18d-49b0-8d74-c309239f3c1e";
   let validUrl: string;
+  let validUrl2: string;
 
   let client: Client;
   let client2: Client;
   let contact: Contact;
+  let contact2: Contact;
 
   const clientRepo = AppDataSource.getRepository(Client);
   const contactRepo = AppDataSource.getRepository(Contact);
@@ -35,46 +37,37 @@ describe("GET /contacts/:contactId", () => {
     await connection.destroy();
   });
 
-  it("Success: The client must be able to retrieve contact profile information", async () => {
+  it("Success: The client must be able to delete contact", async () => {
     client = await clientRepo.save({ ...createClientMock.clientComplete });
     contact = await contactRepo.save({
       ...createContactMock.contactComplete1,
       client,
     });
+    contact2 = await contactRepo.save({
+      ...createContactMock.contactComplete2,
+      client,
+    });
 
     validUrl = baseUrl + `/${contact.id}`;
+    validUrl2 = baseUrl + `/${contact2.id}`;
 
     const response = await supertest(app)
-      .get(validUrl)
+      .delete(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
       );
 
-    const { ...bodyEqual } = createContactMock.contactComplete1;
-    const expectResults = {
-      status: 200,
-    };
-    console.log(response.body);
-    expect(response.status).toBe(expectResults.status);
-    expect(response.body).toEqual(expect.objectContaining(bodyEqual));
-    expect(response.body).not.toEqual(
-      expect.objectContaining({ password: expect.any(String) })
-    );
+    const expectResults = { status: 204 };
 
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        id: expect.any(String),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      })
-    );
+    expect(response.status).toBe(expectResults.status);
+    expect(response.body).toStrictEqual({});
   });
 
-  it("Error: The client must no be able to retrieve contact profile information, from another client ", async () => {
+  it("Error: The client must no be able to delete contact, from another client ", async () => {
     client2 = await clientRepo.save({ ...createClientMock.clientUnique });
     const response = await supertest(app)
-      .get(validUrl)
+      .delete(validUrl2)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client2.email, client2.id)}`
@@ -90,9 +83,9 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid id-1", async () => {
+  it("Error: The client must no be able to delete contact - invalid id-1", async () => {
     const response = await supertest(app)
-      .get(invalidIdUrl)
+      .delete(invalidIdUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
@@ -108,9 +101,9 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid id-2", async () => {
+  it("Error: The client must no be able to delete contact - invalid id-2", async () => {
     const response = await supertest(app)
-      .get(invalidIdUrl2)
+      .delete(invalidIdUrl2)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
@@ -126,9 +119,9 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid token-1", async () => {
+  it("Error: The client must no be able to delete contact - invalid token-1", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .delete(validUrl)
       .set("Authorization", `Bearer ${tokenMock.invalidSignature}`);
 
     const expectResults = {
@@ -141,9 +134,9 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid token-2", async () => {
+  it("Error: The client must no be able to delete contact - invalid token-2", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .delete(validUrl)
       .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`);
 
     const expectResults = {
@@ -156,8 +149,8 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - no token", async () => {
-    const response = await supertest(app).get(validUrl);
+  it("Error: The client must no be able to delete contact - no token", async () => {
+    const response = await supertest(app).delete(validUrl);
 
     const expectResults = {
       status: 401,
@@ -169,9 +162,9 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - expired token", async () => {
+  it("Error: The client must no be able to delete contact - expired token", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .delete(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.jwtExpired(client.email, client.id)}`

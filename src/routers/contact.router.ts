@@ -25,6 +25,7 @@ contactRouters.patch(
   middlewares.validateTokenJwtMiddleware,
   middlewares.validateBodyMiddleware(contactSchemas.updateContactSchema),
   middlewares.validateContactIdMiddleware,
+  middlewares.validatePermissionContactIdMiddleware,
   middlewares.validateContactEmailExistInClientMiddleware,
   contactControllers.updateContactController
 );
@@ -32,5 +33,6 @@ contactRouters.delete(
   "/:id",
   middlewares.validateTokenJwtMiddleware,
   middlewares.validateContactIdMiddleware,
+  middlewares.validatePermissionContactIdMiddleware,
   contactControllers.deleteContactController
 );
