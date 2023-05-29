@@ -15,7 +15,6 @@ export const validateContactEmailExistInClientMiddleware = async (
   const contactRepository: Repository<Contact> =
     AppDataSource.getRepository(Contact);
 
-  console.log(req.params.id);
   if (bodyEmail) {
     const findEmailContactExistInClient = await contactRepository.findOne({
       where: {
