@@ -6,14 +6,10 @@ import { Client } from "../../../entities";
 import { createClientMock } from "../../mocks/clients/createClient.router.mock";
 import tokenMock from "../../mocks/login/token.mock";
 
-describe("GET /clients/profile/:clienteId", () => {
+describe("GET /clients/profile", () => {
   let connection: DataSource;
 
   const baseUrl: string = "/clients/profile";
-  const invalidIdUrl: string = baseUrl + "/123456";
-  const invalidIdUrl2: string =
-    baseUrl + "/90e33fb4-e18d-49b0-8d74-c309239f3c1e";
-  let validUrl: string;
   let client: Client;
   const clientRepo = AppDataSource.getRepository(Client);
 
@@ -28,7 +24,6 @@ describe("GET /clients/profile/:clienteId", () => {
     await clientRepo.remove(users);
 
     client = await clientRepo.save({ ...createClientMock.clientComplete });
-    validUrl = baseUrl + `/${client.id}`;
   });
 
   afterAll(async () => {
@@ -37,7 +32,7 @@ describe("GET /clients/profile/:clienteId", () => {
 
   it("Success: The client must be able to retrieve their profile information", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .get(baseUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
@@ -63,45 +58,9 @@ describe("GET /clients/profile/:clienteId", () => {
     );
   });
 
-  it("Error: The client must not be able to retrieve your profile information - invalid id-1", async () => {
-    const response = await supertest(app)
-      .get(invalidIdUrl)
-      .set(
-        "Authorization",
-        `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      );
-
-    const expectResults = {
-      status: 404,
-      bodyMessage: { message: "Client not found" },
-    };
-
-    expect(response.status).toBe(expectResults.status);
-
-    expect(response.body).toStrictEqual(expectResults.bodyMessage);
-  });
-
-  it("Error: The client must not be able to retrieve your profile information - invalid id-2", async () => {
-    const response = await supertest(app)
-      .get(invalidIdUrl2)
-      .set(
-        "Authorization",
-        `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      );
-
-    const expectResults = {
-      status: 404,
-      bodyMessage: { message: "Client not found" },
-    };
-
-    expect(response.status).toBe(expectResults.status);
-
-    expect(response.body).toStrictEqual(expectResults.bodyMessage);
-  });
-
   it("Error: The client must not be able to retrieve your profile information - invalid token-1", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .get(baseUrl)
       .set("Authorization", `Bearer ${tokenMock.invalidSignature}`);
 
     const expectResults = {
@@ -116,7 +75,7 @@ describe("GET /clients/profile/:clienteId", () => {
 
   it("Error: The client must not be able to retrieve your profile information - invalid token-2", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .get(baseUrl)
       .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`);
 
     const expectResults = {
@@ -130,7 +89,7 @@ describe("GET /clients/profile/:clienteId", () => {
   });
 
   it("Error: The client must not be able to retrieve your profile information - no token", async () => {
-    const response = await supertest(app).get(validUrl);
+    const response = await supertest(app).get(baseUrl);
 
     const expectResults = {
       status: 401,
@@ -144,7 +103,7 @@ describe("GET /clients/profile/:clienteId", () => {
 
   it("Error: The client must not be able to retrieve your profile information - expired token", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .get(baseUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.jwtExpired(client.email, client.id)}`
