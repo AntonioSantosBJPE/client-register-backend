@@ -30,7 +30,6 @@ describe("DELETE /clients/profile/:clienteId", () => {
       withDeleted: true,
     });
     await clientRepo.remove(clients);
-    console.log(clients);
     client = await clientRepo.save({ ...createClientMock.clientComplete });
     client2 = await clientRepo.save({ ...createClientMock.clientUnique });
     validUrl = baseUrl + `/${client.id}`;
