@@ -7,12 +7,17 @@ import { createClientMock } from "../../mocks/clients/createClient.router.mock";
 import { createContactMock } from "../../mocks/contacts/createContact.router.mock";
 import tokenMock from "../../mocks/login/token.mock";
 
-describe("POST /contacts", () => {
+describe("GET /contacts/:contactId", () => {
   let connection: DataSource;
 
   const baseUrl: string = "/contacts";
+  const invalidIdUrl: string = baseUrl + "/123456";
+  const invalidIdUrl2: string =
+    baseUrl + "/90e33fb4-e18d-49b0-8d74-c309239f3c1e";
+  let validUrl: string;
 
   let client: Client;
+  let contact: Contact;
 
   const clientRepo = AppDataSource.getRepository(Client);
   const contactRepo = AppDataSource.getRepository(Contact);
@@ -23,30 +28,33 @@ describe("POST /contacts", () => {
       .catch((error) => console.error(error));
   });
 
-  beforeEach(async () => {
-    // const contacts: Array<Contact> = await contactRepo.find();
-    // await contactRepo.remove(contacts);
-  });
+  beforeEach(async () => {});
 
   afterAll(async () => {
     await connection.destroy();
   });
 
-  it("Success: Client must be able to create a contact - full body", async () => {
+  it("Success: The client must be able to retrieve contact profile information", async () => {
     client = await clientRepo.save({ ...createClientMock.clientComplete });
+    contact = await contactRepo.save({
+      ...createContactMock.contactComplete1,
+      client,
+    });
+
+    validUrl = baseUrl + `/${contact.id}`;
+
     const response = await supertest(app)
-      .post(baseUrl)
+      .get(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      )
-      .send(createContactMock.contactComplete1);
+      );
 
     const { ...bodyEqual } = createContactMock.contactComplete1;
     const expectResults = {
-      status: 201,
+      status: 200,
     };
-
+    console.log(response.body);
     expect(response.status).toBe(expectResults.status);
     expect(response.body).toEqual(expect.objectContaining(bodyEqual));
     expect(response.body).not.toEqual(
@@ -62,18 +70,17 @@ describe("POST /contacts", () => {
     );
   });
 
-  it("Error: Must not be able to create a contact - Contact email already exists in Client", async () => {
+  it("Error: The client must no be able to retrieve contact profile information - invalid id-1", async () => {
     const response = await supertest(app)
-      .post(baseUrl)
+      .get(invalidIdUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      )
-      .send(createContactMock.contactComplete1);
+      );
 
     const expectResults = {
-      status: 409,
-      bodyMessage: { message: "Contact email already exists in Client" },
+      status: 404,
+      bodyMessage: { message: "Contact not found" },
     };
 
     expect(response.status).toBe(expectResults.status);
@@ -81,64 +88,17 @@ describe("POST /contacts", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: Client must no be able to create a contact - invalid body", async () => {
+  it("Error: The client must no be able to retrieve contact profile information - invalid id-2", async () => {
     const response = await supertest(app)
-      .post(baseUrl)
+      .get(invalidIdUrl2)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      )
-      .send(createContactMock.contactInvalidBody);
+      );
 
     const expectResults = {
-      status: 400,
-      bodyMessage: {
-        message: {
-          name: ["Expected string, received number"],
-          email: ["Invalid email"],
-          phone: ["Expected string, received number"],
-        },
-      },
-    };
-
-    expect(response.status).toBe(expectResults.status);
-    expect(response.body).toStrictEqual(expectResults.bodyMessage);
-  });
-
-  it("Error: Client must no be able to create a contact - invalid phone", async () => {
-    const response = await supertest(app)
-      .post(baseUrl)
-      .set(
-        "Authorization",
-        `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      )
-      .send(createContactMock.contactInvalidPhone);
-
-    const expectResults = {
-      status: 400,
-      bodyMessage: {
-        message: {
-          phone: ["Invalid format, use (99)92222-1111"],
-        },
-      },
-    };
-
-    expect(response.status).toBe(expectResults.status);
-    expect(response.body).toStrictEqual(expectResults.bodyMessage);
-  });
-
-  it("Error: Client should not be able to update their account - expired token", async () => {
-    const response = await supertest(app)
-      .post(baseUrl)
-      .set(
-        "Authorization",
-        `Bearer ${tokenMock.jwtExpired(client.email, client.id)}`
-      )
-      .send(createContactMock.contactComplete1);
-
-    const expectResults = {
-      status: 401,
-      bodyMessage: { message: "jwt expired" },
+      status: 404,
+      bodyMessage: { message: "Contact not found" },
     };
 
     expect(response.status).toBe(expectResults.status);
@@ -146,11 +106,10 @@ describe("POST /contacts", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: Client should not be able to update their account - invalid token-1", async () => {
+  it("Error: The client must no be able to retrieve contact profile information - invalid token-1", async () => {
     const response = await supertest(app)
-      .post(baseUrl)
-      .set("Authorization", `Bearer ${tokenMock.invalidSignature}`)
-      .send(createContactMock.contactComplete1);
+      .get(invalidIdUrl2)
+      .set("Authorization", `Bearer ${tokenMock.invalidSignature}`);
 
     const expectResults = {
       status: 401,
@@ -162,11 +121,10 @@ describe("POST /contacts", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: Client should not be able to update their account - invalid token-2", async () => {
+  it("Error: The client must no be able to retrieve contact profile information - invalid token-2", async () => {
     const response = await supertest(app)
-      .post(baseUrl)
-      .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`)
-      .send(createContactMock.contactComplete1);
+      .get(invalidIdUrl2)
+      .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`);
 
     const expectResults = {
       status: 401,
@@ -178,14 +136,30 @@ describe("POST /contacts", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: Client should not be able to update their account - no token", async () => {
-    const response = await supertest(app)
-      .post(baseUrl)
-      .send(createContactMock.contactComplete1);
+  it("Error: The client must no be able to retrieve contact profile information - no token", async () => {
+    const response = await supertest(app).get(invalidIdUrl2);
 
     const expectResults = {
       status: 401,
       bodyMessage: { message: "Missing bearer token" },
+    };
+
+    expect(response.status).toBe(expectResults.status);
+
+    expect(response.body).toStrictEqual(expectResults.bodyMessage);
+  });
+
+  it("Error: The client must no be able to retrieve contact profile information - expired token", async () => {
+    const response = await supertest(app)
+      .get(invalidIdUrl2)
+      .set(
+        "Authorization",
+        `Bearer ${tokenMock.jwtExpired(client.email, client.id)}`
+      );
+
+    const expectResults = {
+      status: 401,
+      bodyMessage: { message: "jwt expired" },
     };
 
     expect(response.status).toBe(expectResults.status);
