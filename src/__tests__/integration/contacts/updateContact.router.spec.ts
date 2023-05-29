@@ -7,7 +7,7 @@ import { createClientMock } from "../../mocks/clients/createClient.router.mock";
 import { createContactMock } from "../../mocks/contacts/createContact.router.mock";
 import tokenMock from "../../mocks/login/token.mock";
 
-describe("GET /contacts/:contactId", () => {
+describe("PATCH /contacts/:contactId", () => {
   let connection: DataSource;
 
   const baseUrl: string = "/contacts";
@@ -35,7 +35,7 @@ describe("GET /contacts/:contactId", () => {
     await connection.destroy();
   });
 
-  it("Success: The client must be able to retrieve contact profile information", async () => {
+  it("Success: The client must be able to update contact profile information", async () => {
     client = await clientRepo.save({ ...createClientMock.clientComplete });
     contact = await contactRepo.save({
       ...createContactMock.contactComplete1,
@@ -45,13 +45,14 @@ describe("GET /contacts/:contactId", () => {
     validUrl = baseUrl + `/${contact.id}`;
 
     const response = await supertest(app)
-      .get(validUrl)
+      .patch(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      );
+      )
+      .send(createContactMock.contactComplete1Update);
 
-    const { ...bodyEqual } = createContactMock.contactComplete1;
+    const { ...bodyEqual } = createContactMock.contactComplete1Update;
     const expectResults = {
       status: 200,
     };
@@ -71,14 +72,15 @@ describe("GET /contacts/:contactId", () => {
     );
   });
 
-  it("Error: The client must no be able to retrieve contact profile information, from another client ", async () => {
+  it("Error: The client must no be able to update contact profile information, from another client ", async () => {
     client2 = await clientRepo.save({ ...createClientMock.clientUnique });
     const response = await supertest(app)
-      .get(validUrl)
+      .patch(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client2.email, client2.id)}`
-      );
+      )
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 403,
@@ -90,13 +92,60 @@ describe("GET /contacts/:contactId", () => {
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid id-1", async () => {
+  it("Error: The client must no be able to update contact profile information - Invalid body", async () => {
     const response = await supertest(app)
-      .get(invalidIdUrl)
+      .patch(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      );
+      )
+      .send(createContactMock.contactInvalidBody);
+
+    const expectResults = {
+      status: 400,
+      bodyMessage: {
+        message: {
+          name: ["Expected string, received number"],
+          email: ["Invalid email"],
+          phone: ["Expected string, received number"],
+        },
+      },
+    };
+
+    expect(response.status).toBe(expectResults.status);
+    expect(response.body).toStrictEqual(expectResults.bodyMessage);
+  });
+
+  it("Error: The client must no be able to update contact profile information - Invalid phone", async () => {
+    const response = await supertest(app)
+      .patch(validUrl)
+      .set(
+        "Authorization",
+        `Bearer ${tokenMock.genToken(client.email, client.id)}`
+      )
+      .send(createContactMock.contactInvalidPhone);
+
+    const expectResults = {
+      status: 400,
+      bodyMessage: {
+        message: {
+          phone: ["Invalid format, use (99)92222-1111"],
+        },
+      },
+    };
+
+    expect(response.status).toBe(expectResults.status);
+    expect(response.body).toStrictEqual(expectResults.bodyMessage);
+  });
+
+  it("Error: The client must no be able to update contact profile information - invalid id-1", async () => {
+    const response = await supertest(app)
+      .patch(invalidIdUrl)
+      .set(
+        "Authorization",
+        `Bearer ${tokenMock.genToken(client.email, client.id)}`
+      )
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 404,
@@ -104,17 +153,17 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid id-2", async () => {
+  it("Error: The client must no be able to update contact profile information - invalid id-2", async () => {
     const response = await supertest(app)
-      .get(invalidIdUrl2)
+      .patch(invalidIdUrl2)
       .set(
         "Authorization",
         `Bearer ${tokenMock.genToken(client.email, client.id)}`
-      );
+      )
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 404,
@@ -122,14 +171,14 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid token-1", async () => {
+  it("Error: The client must no be able to update contact profile information - invalid token-1", async () => {
     const response = await supertest(app)
-      .get(validUrl)
-      .set("Authorization", `Bearer ${tokenMock.invalidSignature}`);
+      .patch(validUrl)
+      .set("Authorization", `Bearer ${tokenMock.invalidSignature}`)
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 401,
@@ -137,14 +186,14 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - invalid token-2", async () => {
+  it("Error: The client must no be able to update contact profile information - invalid token-2", async () => {
     const response = await supertest(app)
-      .get(validUrl)
-      .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`);
+      .patch(validUrl)
+      .set("Authorization", `Bearer ${tokenMock.jwtMalformed}`)
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 401,
@@ -152,12 +201,13 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - no token", async () => {
-    const response = await supertest(app).get(validUrl);
+  it("Error: The client must no be able to update contact profile information - no token", async () => {
+    const response = await supertest(app)
+      .patch(validUrl)
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 401,
@@ -165,17 +215,17 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 
-  it("Error: The client must no be able to retrieve contact profile information - expired token", async () => {
+  it("Error: The client must no be able to update contact profile information - expired token", async () => {
     const response = await supertest(app)
-      .get(validUrl)
+      .patch(validUrl)
       .set(
         "Authorization",
         `Bearer ${tokenMock.jwtExpired(client.email, client.id)}`
-      );
+      )
+      .send(createContactMock.contactComplete1Update);
 
     const expectResults = {
       status: 401,
@@ -183,7 +233,6 @@ describe("GET /contacts/:contactId", () => {
     };
 
     expect(response.status).toBe(expectResults.status);
-
     expect(response.body).toStrictEqual(expectResults.bodyMessage);
   });
 });

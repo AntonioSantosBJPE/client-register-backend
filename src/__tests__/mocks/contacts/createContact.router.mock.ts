@@ -25,8 +25,13 @@ export const createContactMock = {
     phone: 666666,
   },
   contactInvalidPhone: {
-    name: "Unique",
-    email: "unique@mail.com",
+    name: "Unique222",
+    email: "unique222@mail.com",
     phone: "(81)92222-11",
+  },
+  contactComplete1Update: {
+    name: "contact22222",
+    email: "contact22222@mail.com",
+    phone: "(81)92222-4444",
   },
 };
