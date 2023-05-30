@@ -26,7 +26,7 @@ O projeto foi desenvolvido totalmente em typescript, utilizando o node.Js, e o f
 Para realizar a serialização dos dados, das requisições, foi utilizado a biblioteca zod, e no que diz respeito a banco de dados a escolha foi
 por utilizar um banco de dados relacional, o postgres, onde as consultas eram gerenciadas pelo o typeORM. 
 A aplicação conta com testes de integração em todas as rotas que foram feitos utilizando jest e supertest.
-Para realizar o deploy do projeto foi escolhido o rende, tanto para o banco de dados, quanto para o servidor.
+Para realizar o deploy do projeto foi escolhido o render, tanto para o banco de dados, quanto para o servidor.
 Segue os links para mais informações sobre as tecnologias utilizadas:
 - [NodeJS](https://nodejs.org/en/)
 - [Express](https://expressjs.com/pt-br/)
@@ -209,6 +209,6 @@ O objeto Contacts é definido como:
 
 ## Autor
 
-- [@Antonio](https://github.com/AntonioSantosBJPE)
+- [@Antonio Santos](https://github.com/AntonioSantosBJPE)
 
 
